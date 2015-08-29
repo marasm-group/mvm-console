@@ -10,9 +10,9 @@ import com.marasm.ppc.Variable;
  */
 public class Console extends PPCDevice
 {
-    final String ctrlPort="63";
-    final String dataPort="64";
-    final String charPort="65";
+    final String ctrlPort="63.0";
+    final String dataPort="63.1";
+    final String charPort="63.2";
 
     String ctrlBuf=new String();
     String charBuf=new String();
