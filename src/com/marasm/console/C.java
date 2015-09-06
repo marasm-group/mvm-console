@@ -110,7 +110,6 @@ public class C {
             pane = new JTextPane();
             doc = pane.getStyledDocument();
             defaultStyles();
-            redirectSystemStreams();
             fontNames = GraphicsEnvironment.getLocalGraphicsEnvironment()
                     .getAvailableFontFamilyNames();
             InputPolicy cp = new InputPolicy();
@@ -122,7 +121,7 @@ public class C {
             caret.addChangeListener(cp);
             maxInput = -1;
             editing = false;
-            
+
             Action backspace = new AbstractAction() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -1534,7 +1533,7 @@ public class C {
             });
         }
         
-        private void redirectSystemStreams() {
+        public void redirectSystemStreams() {
             OutputStream out = new OutputStream() {
                 @Override
                 public void write(final int b) throws IOException {
