@@ -4,6 +4,7 @@
     <root id="archive" name="console.jar">
       <element id="module-output" name="console" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/ppc.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/json-20141113.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>

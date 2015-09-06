@@ -29,16 +29,23 @@ public class Console extends PPCDevice
             +"\n\"foreground\":{\"color\":{\"red\":0,\"green\":255,\"blue\":0}},"
             +"\n\"caret\":{\"color\":{\"red\":0,\"green\":255,\"blue\":0}},"
             +"\n\"user\":{\"color\":{\"red\":255,\"green\":255,\"blue\":255}},"
-            +"\n\"font\":{\"name\":\"Lucida Console\",\"size\":14},\n"
-            +"\"redirectPrintStreams\":true\n}";
+            +"\n\"font\":{\"name\":\"Lucida Console\",\"size\":14,\"style:\":15},\n"
+            +"\"redirectStdIO\":true\n}";
     public String jarLocation()
     {
-        return this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
+        String path=this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
+        if(path.endsWith("!/")){path=path.substring(0,path.length()-2);}
+        String fileName=path.substring(path.lastIndexOf(File.separatorChar) + 1);
+        if(fileName.contains(".jar")){path=path.substring(0, path.lastIndexOf(File.separatorChar)+1).trim();}
+        if(path.startsWith("file:")){path=path.substring(5);}
+        return path.trim();
     }
     public String manufacturer() {return "marasm";}
     public void connected() {
         C.io.setTitle("MVM Console");
         String jsonLoc=jarLocation() + "console.json";
+        jsonLoc=jsonLoc.trim();
+        System.out.println("console.json: "+jsonLoc);
         jsonLoc=jsonLoc.replaceAll("[%]20"," ");
         System.out.println(jsonLoc);
         FileReader jsonReader;
@@ -53,20 +60,24 @@ public class Console extends PPCDevice
                 fw.close();
                 fw.flush();
                 config=new JSONObject(defaultSettings);
-                e.printStackTrace();
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
         }
         try {
-            JSONObject color = config.getJSONObject("background").getJSONObject("color");
-            C.io.setBackgroundColor(new Color(color.getInt("red"), color.getInt("green"), color.getInt("blue")));
-            color = config.getJSONObject("caret").getJSONObject("color");
-            C.io.setCaretColor(new Color(color.getInt("red"), color.getInt("green"), color.getInt("blue")));
-            color = config.getJSONObject("user").getJSONObject("color");
-            C.io.setPromptColor(new Color(color.getInt("red"), color.getInt("green"), color.getInt("blue")));
-            color = config.getJSONObject("foreground").getJSONObject("color");
-            C.io.setTextColor(new Color(color.getInt("red"), color.getInt("green"), color.getInt("blue")));
+            try{JSONObject font=config.getJSONObject("font");
+                if(font.has("style")){C.io.setFont(font.getString("name"),font.getInt("style"),font.getInt("size"));}
+                else{C.io.setFont(font.getString("name"),0,font.getInt("size"));}
+            }catch (JSONException e){}
+            JSONObject color;
+            try{color = config.getJSONObject("background").getJSONObject("color");
+            C.io.setBackgroundColor(new Color(color.getInt("red"), color.getInt("green"), color.getInt("blue")));}catch (JSONException e){}
+            try{color = config.getJSONObject("caret").getJSONObject("color");
+            C.io.setCaretColor(new Color(color.getInt("red"), color.getInt("green"), color.getInt("blue")));}catch (JSONException e){}
+            try{color = config.getJSONObject("user").getJSONObject("color");
+            C.io.setPromptColor(new Color(color.getInt("red"), color.getInt("green"), color.getInt("blue")));}catch (JSONException e){}
+            try{color = config.getJSONObject("foreground").getJSONObject("color");
+            C.io.setTextColor(new Color(color.getInt("red"), color.getInt("green"), color.getInt("blue")));}catch (JSONException e){}
             if(config.getBoolean("redirectStdIO")){C.io.redirectSystemStreams();}
             try{C.io.setTitle(config.getString("windowTitle"));}catch (JSONException e){}
         }catch (JSONException e){
@@ -76,11 +87,11 @@ public class Console extends PPCDevice
                 fw.close();
                 fw.flush();
                 config=new JSONObject(defaultSettings);
-                e.printStackTrace();
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
         }
+        try {Thread.sleep(100);}catch (InterruptedException e) {}
         PPC.connect(new Variable(ctrlPort), this);
         PPC.connect(new Variable(dataPort), this);
         PPC.connect(new Variable(charPort), this);

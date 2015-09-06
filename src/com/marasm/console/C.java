@@ -225,6 +225,14 @@ public class C {
                 @Override
                 public void run() {
                     pane.setFont(new Font(font, style, size));
+                    StyleConstants.setFontFamily(promptStyle, font);
+                    StyleConstants.setFontSize(promptStyle, size);
+                    if((style&0x1)!=0){StyleConstants.setBold(promptStyle,true);}
+                    else {StyleConstants.setBold(promptStyle,false);}
+                    if((style&0x2)!=0){StyleConstants.setItalic(promptStyle, true);}
+                    else {StyleConstants.setItalic(promptStyle, false);}
+                    if((style&0x4)!=0){StyleConstants.setUnderline(promptStyle, true);}
+                    else {StyleConstants.setUnderline(promptStyle, false);}
                 }
                 
             });
