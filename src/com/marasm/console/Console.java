@@ -9,9 +9,6 @@ import org.json.JSONObject;
 
 import java.awt.*;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 /**
  * Created by sr3u on 20.08.15.
@@ -22,7 +19,6 @@ public class Console extends PPCDevice
     final String dataPort="63.1";
     final String charPort="63.2";
 
-    String ctrlBuf=new String();
     String charBuf=new String();
     static final String defaultSettings="{\n"
             +"\"background\":{\"color\":{\"red\":0,\"green\":0,\"blue\":0}},"
@@ -40,12 +36,12 @@ public class Console extends PPCDevice
         if(path.startsWith("file:")){path=path.substring(5);}
         return path.trim();
     }
+    @Override
     public String manufacturer() {return "marasm";}
     public void connected() {
         C.io.setTitle("MVM Console");
         String jsonLoc=jarLocation() + "console.json";
         jsonLoc=jsonLoc.trim();
-        System.out.println("console.json: "+jsonLoc);
         jsonLoc=jsonLoc.replaceAll("[%]20"," ");
         System.out.println(jsonLoc);
         FileReader jsonReader;
@@ -103,11 +99,7 @@ public class Console extends PPCDevice
         switch (p)
         {
             case ctrlPort:
-                if(d.equals(CTRL.NOP.toString())){return;}
-                if(d.equals(CTRL.GETMAN.toString())){
-                    ctrlBuf=manufacturer();
-                    return;}
-                break;
+                ctrlOut(data);
             case dataPort:
                 C.io.print(d);
                 break;
@@ -126,21 +118,7 @@ public class Console extends PPCDevice
         switch (p)
         {
             case ctrlPort:
-                if(ctrlBuf.length()>0)
-                {
-                    if(ctrlBuf.length()==0) {ctrlBuf=new String();}
-                    if(ctrlBuf.length()<2){
-                        Variable tmp=new Variable(ctrlBuf.substring(0,1).getBytes()[0]);
-                        ctrlBuf=ctrlBuf.substring(1);
-                        return tmp;
-                    }
-                    else{
-                        Variable v=new Variable(ctrlBuf.substring(0,1).getBytes()[0]);
-                        ctrlBuf=ctrlBuf.substring(1);
-                        return v;
-                    }
-                }
-                return new Variable();
+                return ctrlIn();
             case dataPort:
                 return new Variable(C.io.nextLine());
             case charPort:
@@ -170,6 +148,13 @@ public class Console extends PPCDevice
     {
         Console con=new Console();
         con.connected();
+        Variable v=new Variable(-1);
+        PPC.out(new Variable(con.ctrlPort), new Variable(CTRL.GETMAN));
+        while(!v.equals(new Variable(0)))
+        {
+            v=PPC.in(new Variable(con.ctrlPort));
+            PPC.out(new Variable(con.charPort),v);
+        } PPC.out(new Variable(con.charPort),new Variable(0));
         PPC.out(new Variable(con.dataPort), new Variable(100));
         PPC.in(new Variable(con.dataPort));
         System.out.println("HELLO!");
