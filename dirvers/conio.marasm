@@ -18,7 +18,7 @@ mov conio_dataPort 63.1     ;;
 mov conio_charPort 63.2     ;;
 ret
 
-$pustr  ;; prints a null ('\0') terminated string, passed through stack
+$putstr  ;; prints a null ('\0') terminated string, passed through stack
 var chr
 @conio_putstr_loop_0
 pop chr
